@@ -1,0 +1,12 @@
+{
+  "name": "stocksbot",
+  "version": "1.0.0",
+  "description": "Stock market bot for Messenger",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/Fatxx/stocksbot",
+    "type": "git"
+  },
+  "author": "fatxx",
+  "license": "MIT"
+}
