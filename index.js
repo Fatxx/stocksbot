@@ -48,7 +48,7 @@ function sendMessage (recipientId, symbol) {
       method: 'POST',
       json: {
         recipient: {id: recipientId},
-        message: `Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`
+        message: {text: `Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`}
       }
     }, function (error, response, body) {
       if (error) {
