@@ -40,6 +40,7 @@ function sendMessage (recipientId, symbol) {
     symbol,
     fields: ['s', 'n', 'd1', 'l1', 'y', 'r']
   }, function (err, snapshot) {
+    console.log(`Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`)
     if (err) return err
     request({
       url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -47,7 +48,7 @@ function sendMessage (recipientId, symbol) {
       method: 'POST',
       json: {
         recipient: {id: recipientId},
-        message: {text: snapshot}
+        message: `Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`
       }
     }, function (error, response, body) {
       if (error) {
