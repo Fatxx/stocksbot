@@ -1,4 +1,4 @@
-/* globals describe, it */
+/* eslint-env mocha */
 var { receivedMessage } = require('../MessageHandler')
 
 var chai = require('chai')
