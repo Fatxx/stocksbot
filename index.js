@@ -38,7 +38,7 @@ app.post('/webhook', function (req, res) {
         if (event.message) {
           receivedMessage(event)
             .then((data) => console.log(data))
-            .error((error) => console.error(error))
+            .catch((error) => console.error(error))
         } else {
           console.log('Webhook received unknown event: ', event)
         }
