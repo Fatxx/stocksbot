@@ -34,10 +34,11 @@ app.post('/webhook', function (req, res) {
 
       // Iterate over each messaging event
       entry.messaging.map((event) => {
+        console.log('event', event)
         if (event.message) {
           receivedMessage(event)
-            .then(console.log)
-            .error(console.error)
+            .then((data) => console.log(data))
+            .error((error) => console.error(error))
         } else {
           console.log('Webhook received unknown event: ', event)
         }
