@@ -1,6 +1,7 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 var app = express()
+var { receivedMessage } = require('./MessageHandler')
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -35,6 +36,8 @@ app.post('/webhook', function (req, res) {
       entry.messaging.map((event) => {
         if (event.message) {
           receivedMessage(event)
+            .then(console.log)
+            .error(console.error)
         } else {
           console.log('Webhook received unknown event: ', event)
         }

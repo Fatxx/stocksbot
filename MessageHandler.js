@@ -3,7 +3,7 @@ const yahooFinance = require('yahoo-finance')
 const R = require('ramda')
 
 // generic function sending messages
-export function receivedMessage (event) {
+exports.receivedMessage = (event) => {
   var senderID = event.sender.id
   var recipientID = event.recipient.id
   var timeOfMessage = event.timestamp
@@ -20,7 +20,7 @@ export function receivedMessage (event) {
   if (messageText) {
     // If we receive a text message, check to see if it matches a keyword
     // and send back the example. Otherwise, just echo the text we received.
-    sendGenericMessage(senderID, messageText)
+    return sendGenericMessage(senderID, messageText)
     // switch (messageText) {
     //   case 'generic':
     //     sendGenericMessage(senderID, messageText)
@@ -30,71 +30,59 @@ export function receivedMessage (event) {
     //     sendTextMessage(senderID, messageText)
     // }
   } else if (messageAttachments) {
-    sendTextMessage(senderID, 'Message with attachment received')
+    return sendTextMessage(senderID, 'Message with attachment received')
   }
 }
 
-export function sendGenericMessage (recipientId, messageText) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: 'template',
-        payload: {
-          template_type: 'generic',
-          elements: [{
-            title: 'rift',
-            subtitle: 'Next-generation virtual reality',
-            item_url: 'https://www.oculus.com/en-us/rift/',
-            image_url: 'http://messengerdemo.parseapp.com/img/rift.png',
-            buttons: [{
-              type: 'web_url',
-              url: 'https://www.oculus.com/en-us/rift/',
-              title: 'Open Web URL'
-            }, {
-              type: 'postback',
-              title: 'Call Postback',
-              payload: 'Payload for first bubble'
-            }]
+function sendGenericMessage (recipientId, messageText) {
+  var sendMessage = callSendAPI(recipientId)
+  var message = {
+    attachment: {
+      type: 'template',
+      payload: {
+        template_type: 'generic',
+        elements: [{
+          title: 'rift',
+          subtitle: 'Next-generation virtual reality',
+          item_url: 'https://www.oculus.com/en-us/rift/',
+          image_url: 'http://messengerdemo.parseapp.com/img/rift.png',
+          buttons: [{
+            type: 'web_url',
+            url: 'https://www.oculus.com/en-us/rift/',
+            title: 'Open Web URL'
           }, {
-            title: 'touch',
-            subtitle: 'Your Hands, Now in VR',
-            item_url: 'https://www.oculus.com/en-us/touch/',
-            image_url: 'http://messengerdemo.parseapp.com/img/touch.png',
-            buttons: [{
-              type: 'web_url',
-              url: 'https://www.oculus.com/en-us/touch/',
-              title: 'Open Web URL'
-            }, {
-              type: 'postback',
-              title: 'Call Postback',
-              payload: 'Payload for second bubble'
-            }]
+            type: 'postback',
+            title: 'Call Postback',
+            payload: 'Payload for first bubble'
           }]
-        }
+        }, {
+          title: 'touch',
+          subtitle: 'Your Hands, Now in VR',
+          item_url: 'https://www.oculus.com/en-us/touch/',
+          image_url: 'http://messengerdemo.parseapp.com/img/touch.png',
+          buttons: [{
+            type: 'web_url',
+            url: 'https://www.oculus.com/en-us/touch/',
+            title: 'Open Web URL'
+          }, {
+            type: 'postback',
+            title: 'Call Postback',
+            payload: 'Payload for second bubble'
+          }]
+        }]
       }
     }
   }
-
-  return callSendAPI(messageData)
+  return sendMessage(message)
 }
 
 function sendTextMessage (recipientId, messageText) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: messageText
-    }
-  }
-
-  return callSendAPI(messageData)
+  var sendMessage = callSendAPI(recipientId)
+  return getStockBySymbol(messageText)
+    .then((data) => sendMessage(data))
 }
 
-export function getStockBySymbol (symbol) {
+function getStockBySymbol (symbol) {
   return new Promise((resolve, reject) => {
     yahooFinance.snapshot({
       symbol,
@@ -106,7 +94,11 @@ export function getStockBySymbol (symbol) {
         lastTraded: ${snapshot.lastTradeDate},
         lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`
       )
-      return resolve(snapshot)
+      let data = `
+        Name: ${snapshot.name},
+        lastTraded: ${snapshot.lastTradeDate},
+        lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`
+      return resolve(data)
     })
   })
 }
