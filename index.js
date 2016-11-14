@@ -1,8 +1,6 @@
 var express = require('express')
 var bodyParser = require('body-parser')
-var request = require('request')
 var app = express()
-var yahooFinance = require('yahoo-finance')
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -24,38 +22,30 @@ app.get('/webhook', function (req, res) {
 
 // handler receiving messages
 app.post('/webhook', function (req, res) {
-  var events = req.body.entry[0].messaging
-  for (var i = 0; i < events.length; i++) {
-    var event = events[i]
-    if (event.message && event.message.text) {
-      sendMessage(event.sender.id, event.message.text)
-    }
-  }
-  res.sendStatus(200)
-})
+  var data = req.body
 
-// generic function sending messages
-function sendMessage (recipientId, symbol) {
-  yahooFinance.snapshot({
-    symbol,
-    fields: ['s', 'n', 'd1', 'l1', 'y', 'r']
-  }, function (err, snapshot) {
-    console.log(`Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`)
-    if (err) return err
-    request({
-      url: 'https://graph.facebook.com/v2.6/me/messages',
-      qs: {access_token: process.env.PAGE_ACCESS_TOKEN},
-      method: 'POST',
-      json: {
-        recipient: {id: recipientId},
-        message: {text: `Name: ${snapshot.name}, lastTraded: ${snapshot.lastTradeDate}, lastTradePriceOnly: ${snapshot.lastTradePriceOnly}`}
-      }
-    }, function (error, response, body) {
-      if (error) {
-        console.log('Error sending message: ', error)
-      } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
-      }
+  // Make sure this is a page subscription
+  if (data.object === 'page') {
+    // Iterate over each entry - there may be multiple if batched
+    data.entry.forEach((entry) => {
+      // var pageID = entry.id
+      // var timeOfEvent = entry.time
+
+      // Iterate over each messaging event
+      entry.messaging.map((event) => {
+        if (event.message) {
+          receivedMessage(event)
+        } else {
+          console.log('Webhook received unknown event: ', event)
+        }
+      })
     })
-  })
-}
+
+    // Assume all went well.
+    //
+    // You must send back a 200, within 20 seconds, to let us know
+    // you've successfully received the callback. Otherwise, the request
+    // will time out and we will keep trying to resend.
+    res.sendStatus(200)
+  }
+})
